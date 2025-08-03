@@ -1,14 +1,37 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-  <title>资源详情</title>
+  <meta charset="UTF-8" />
+  <title>资源展示</title>
 </head>
 <body>
-  <h1>资源名称</h1>
-  <p>ID: RS000001</p>
-  <p>作者: 示例用户</p>
-  <p>价格: ¥49.00</p>
-  <button>模拟购买</button>
+  <h1>资源展示</h1>
+  <div id="resource-list"></div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabaseUrl = 'https://kkpujgndxgwwxywrilbu.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrcHVqZ25keGd3d3h5d3JpbGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjk0MDEsImV4cCI6MjA2OTgwNTQwMX0.p8dgsWz784DSaVwcHkheg0bdEiVfS8J9F4TMaTyMXpA';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data, error } = await supabase.from('resources').select('*');
+    const list = document.getElementById('resource-list');
+    if (error) {
+      list.innerHTML = '<p>加载失败: ' + error.message + '</p>';
+    } else {
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.style.border = '1px solid #ccc';
+        div.style.margin = '10px';
+        div.style.padding = '10px';
+        div.innerHTML = `<strong>${item.title}</strong><br>
+                         作者: ${item.author}<br>
+                         价格: ¥${item.price}<br>
+                         <a href="${item.file_url}" target="_blank">查看文件</a>`;
+        list.appendChild(div);
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,16 +1,51 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
+  <meta charset="UTF-8" />
   <title>上传资源</title>
 </head>
 <body>
-  <h1>资源上传</h1>
-  <form>
-    <label>标题：<input type="text" name="title" /></label><br/>
-    <label>作者：<input type="text" name="author" /></label><br/>
-    <label>资源文件：<input type="file" name="file" /></label><br/>
-    <input type="submit" value="上传" />
+  <h1>上传资源</h1>
+  <form id="upload-form">
+    <label>资源名称: <input type="text" id="title" required></label><br><br>
+    <label>作者: <input type="text" id="author" required></label><br><br>
+    <label>价格: <input type="number" id="price" required></label><br><br>
+    <label>文件: <input type="file" id="file" required></label><br><br>
+    <button type="submit">上传</button>
   </form>
+
+  <p id="status"></p>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabaseUrl = 'https://kkpujgndxgwwxywrilbu.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrcHVqZ25keGd3d3h5d3JpbGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjk0MDEsImV4cCI6MjA2OTgwNTQwMX0.p8dgsWz784DSaVwcHkheg0bdEiVfS8J9F4TMaTyMXpA';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    document.getElementById('upload-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const author = document.getElementById('author').value;
+      const price = parseFloat(document.getElementById('price').value);
+      const file = document.getElementById('file').files[0];
+
+      const { data, error } = await supabase.storage.from('resources').upload(`public/${Date.now()}_${file.name}`, file);
+      if (error) {
+        document.getElementById('status').textContent = '上传失败: ' + error.message;
+        return;
+      }
+
+      const fileUrl = `${supabaseUrl}/storage/v1/object/public/resources/${data.path}`;
+
+      const insertRes = await supabase.from('resources').insert([{ title, author, price, file_url: fileUrl }]);
+      if (insertRes.error) {
+        document.getElementById('status').textContent = '写入数据库失败: ' + insertRes.error.message;
+        return;
+      }
+
+      document.getElementById('status').textContent = '上传成功！';
+    });
+  </script>
 </body>
 </html>
