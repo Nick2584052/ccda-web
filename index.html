@@ -3,11 +3,37 @@
 <html>
 <head>
   <title>CCDA 首页</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    .card { border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem; border-radius: 5px; }
+  </style>
 </head>
 <body>
-  <h1>欢迎来到 CCDA</h1>
-  <p>这里将展示资源分类、搜索与卡片展示。</p>
-  <a href="/upload.html">上传资源</a> |
-  <a href="/login.html">登录</a>
+  <h1>资源展示</h1>
+  <div id="resource-list">加载中...</div>
+
+  <script>
+    const supabaseUrl = 'https://kkpujgndxgwwxywrilbu.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrcHVqZ25keGd3d3h5d3JpbGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjk0MDEsImV4cCI6MjA2OTgwNTQwMX0.p8dgsWz784DSaVwcHkheg0bdEiVfS8J9F4TMaTyMXpA';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function loadResources() {
+      const { data, error } = await supabase.from('resources').select('*');
+      const list = document.getElementById('resource-list');
+      if (error) {
+        list.innerHTML = '加载失败';
+      } else {
+        list.innerHTML = '';
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.innerHTML = `<strong>${item.title}</strong><br/>作者: ${item.author}<br/>价格: ¥${item.price}<br/><a href="resource.html?id=${item.id}">查看详情</a>`;
+          list.appendChild(div);
+        });
+      }
+    }
+
+    loadResources();
+  </script>
 </body>
 </html>
