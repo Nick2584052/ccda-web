@@ -1,39 +1,39 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
-'use client'
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+type Resource = {
+  id: number;
+  title: string;
+  file_url: string;
+  type: string;
+};
 
-interface Resource {
-  id: number
-  title: string
-  author: string
-  price: number
-  file_url: string
-}
-
-export default function Home() {
-  const [resources, setResources] = useState<Resource[]>([])
+export default function HomePage() {
+  const [resources, setResources] = useState<Resource[]>([]);
 
   useEffect(() => {
     async function fetchData() {
-      const { data, error } = await supabase.from('resources').select('*').order('id', { ascending: false })
-      if (data) setResources(data)
+      const { data, error } = await supabase.from('resources').select('*');
+      if (!error && data) setResources(data);
     }
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   return (
-    <div>
-      <h2 className="text-xl mb-4 font-bold">最新资源</h2>
-      {resources.map((res) => (
-        <div key={res.id} className="border rounded p-4 mb-3 bg-white">
-          <div className="text-lg font-semibold">{res.title}</div>
-          <div className="text-sm text-gray-600">作者：{res.author}</div>
-          <div className="text-sm">价格：¥{res.price}</div>
-          <a href={res.file_url} target="_blank" className="text-blue-600 text-sm underline">查看文件</a>
+    <main className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {resources.map((r) => (
+        <div key={r.id} className="border p-4 rounded shadow hover:shadow-lg transition">
+          <img src={r.file_url} alt={r.title} className="w-full h-48 object-cover mb-2" />
+          <h3 className="text-lg font-semibold">{r.title}</h3>
+          <p className="text-sm text-gray-500">{r.type}</p>
         </div>
       ))}
-    </div>
-  )
+    </main>
+  );
 }
